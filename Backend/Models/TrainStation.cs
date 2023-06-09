@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Models.Enum;
@@ -10,7 +11,9 @@ namespace API.Models
     {
         public int StationId { get; set; }
         public int CityId { get; set; }
+        [Required]
         public int NumbrOfPlatforms { get; set; }
+        [Required]
         public int NumbrOfTracks { get; set; }
         public string Name { get; set; }
         public StationType? StationType { get; set; }

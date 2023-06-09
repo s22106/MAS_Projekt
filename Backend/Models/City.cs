@@ -10,6 +10,8 @@ namespace API.Models
     public class City
     {
         public int CityId { get; set; }
+        [StringLength(30)]
+        [Required]
         public String Name { get; set; }
         public virtual IEnumerable<TrainStation> TrainStations { get; set; }
     }
