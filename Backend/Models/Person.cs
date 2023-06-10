@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace API.Models
 {
-    public class Person
+    public abstract class Person
     {
         public int PersonId { get; set; }
         [Required]

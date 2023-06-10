@@ -12,7 +12,7 @@ namespace API.Models
         [Required]
         public int Length { get; set; }
         [Required]
-        public DateTime PlannedTime { get; set; }
+        public int PlannedTime { get; set; }
         public virtual IEnumerable<LinkStations> LinkStations { get; set; }
         public virtual IEnumerable<Transit> Transits { get; set; }
     }

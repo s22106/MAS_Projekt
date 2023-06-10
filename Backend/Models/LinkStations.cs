@@ -14,8 +14,8 @@ namespace API.Models
         public int StationId { get; set; }
         [Required]
         public int Number { get; set; }
-        public DateTime? DepartureTime { get; set; }
-        public DateTime? ArrivalTime { get; set; }
+        public TimeOnly? DepartureTime { get; set; }
+        public TimeOnly? ArrivalTime { get; set; }
         [EnumDataType(typeof(LinkStations))]
         public StationType? Type { get; set; }
         public virtual RailLink Link { get; set; }

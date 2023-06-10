@@ -12,7 +12,7 @@ namespace API.Models
         public int SeatNumber { get; set; }
         [Required]
         [EnumDataType(typeof(SeatType))]
-        public string Type { get; set; }
+        public SeatType Type { get; set; }
         public virtual Wagon Wagon { get; set; }
     }
 }

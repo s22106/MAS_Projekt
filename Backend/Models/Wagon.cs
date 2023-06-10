@@ -14,7 +14,7 @@ namespace API.Models
         [Required]
         public int Class { get; set; }
         [Required]
-        public int NuberOfSeats { get; set; }
+        public int NumberOfSeats { get; set; }
         public bool? IsSeatRequired { get; set; }
         [Required]
         public int WagonNumber { get; set; }

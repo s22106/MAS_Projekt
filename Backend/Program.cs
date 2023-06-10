@@ -1,6 +1,18 @@
+using API.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+//Add DbContext
+
+builder.Services.AddDbContext<MASDbContext>(e =>
+{
+    e.UseNpgsql("User ID=postgres;Password=postgres;Host=localhost;Port=5432;Database=postgres");
+});
+
 // Add services to the container.
+//services.AddScoped<>
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

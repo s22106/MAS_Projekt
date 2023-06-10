@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Models.Enum;
 using Backend.Models.Enum;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
-namespace API.Models.Enum
+namespace API.Models
 {
     public class MASDbContext : DbContext
     {
@@ -32,6 +33,7 @@ namespace API.Models.Enum
             NpgsqlConnection.GlobalTypeMapper.MapEnum<StationType>();
             NpgsqlConnection.GlobalTypeMapper.MapEnum<OpenWagonType>();
             NpgsqlConnection.GlobalTypeMapper.MapEnum<SeatType>();
+            NpgsqlConnection.GlobalTypeMapper.MapEnum<TransitState>();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -39,6 +41,7 @@ namespace API.Models.Enum
             modelBuilder.HasPostgresEnum<StationType>();
             modelBuilder.HasPostgresEnum<OpenWagonType>();
             modelBuilder.HasPostgresEnum<SeatType>();
+            modelBuilder.HasPostgresEnum<TransitState>();
 
             modelBuilder.Entity<City>(builder =>
             {
@@ -53,31 +56,70 @@ namespace API.Models.Enum
             modelBuilder.Entity<TrainStation>(builder =>
             {
                 builder.HasKey(e => e.StationId);
-                builder.Property(e => e.NumbrOfPlatforms).IsRequired();
-                builder.Property(e => e.NumbrOfTracks).IsRequired();
                 builder.HasOne(e => e.City).WithMany(e => e.TrainStations).HasForeignKey(e => e.CityId);
                 //wiecej stacji
                 builder.HasData(new TrainStation
                 {
                     StationId = 1,
                     CityId = 1,
-                    NumbrOfPlatforms = 5,
-                    NumbrOfTracks = 10,
-                    Name = "Warszawa Centralna",
-                    StationType = StationType.StartStation
+                    NumberOfPlatforms = 5,
+                    NumberOfTracks = 10,
+                    Name = "Warszawa Wschodnia",
+                },
+                new TrainStation
+                {
+                    StationId = 2,
+                    CityId = 1,
+                    NumberOfPlatforms = 5,
+                    NumberOfTracks = 10,
+                    Name = "Warszawa Centralna"
+                },
+                new TrainStation
+                {
+                    StationId = 3,
+                    CityId = 1,
+                    NumberOfPlatforms = 5,
+                    NumberOfTracks = 10,
+                    Name = "Warszawa Zachodnia"
                 });
+
             });
 
             modelBuilder.Entity<LinkStations>(builder =>
             {
-                builder.HasKey(e => new { e.StationId, e.LinkId });
-                builder.Property(e => e.Number).IsRequired();
-                builder.Property(e => e.DepartureTime);
-                builder.Property(e => e.ArrivalTime);
-                // type moze byc enum trzeba zrobic risercz
-                builder.Property(e => e.Type);
+                builder.HasKey(e => new
+                {
+                    e.StationId,
+                    e.LinkId
+                });
                 builder.HasOne(e => e.Station).WithMany(e => e.LinkStations).HasForeignKey(e => e.StationId);
                 builder.HasOne(e => e.Link).WithMany(e => e.LinkStations).HasForeignKey(e => e.LinkId);
+                builder.HasData(
+                    new LinkStations
+                    {
+                        StationId = 1,
+                        LinkId = 1,
+                        Number = 1,
+                        DepartureTime = new TimeOnly(12, 0, 0),
+                        Type = StationType.StartStation
+                    },
+                    new LinkStations
+                    {
+                        StationId = 2,
+                        LinkId = 1,
+                        Number = 2,
+                        DepartureTime = new TimeOnly(12, 5, 0),
+                        ArrivalTime = new TimeOnly(12, 7, 0),
+                    },
+                    new LinkStations
+                    {
+                        StationId = 3,
+                        LinkId = 1,
+                        Number = 3,
+                        ArrivalTime = new TimeOnly(12, 10, 0),
+                        Type = StationType.EndStation
+                    }
+                );
             });
 
             modelBuilder.Entity<RailLink>(builder =>
@@ -85,6 +127,12 @@ namespace API.Models.Enum
                 builder.HasKey(e => e.LinkId);
                 builder.Property(e => e.Length);
                 builder.Property(e => e.PlannedTime);
+                builder.HasData(new RailLink
+                {
+                    LinkId = 1,
+                    Length = 10,
+                    PlannedTime = 10
+                });
             });
 
             modelBuilder.Entity<Transit>(builder =>
@@ -92,11 +140,26 @@ namespace API.Models.Enum
                 builder.HasKey(e => e.TransitId);
                 builder.HasOne(e => e.Link).WithMany(e => e.Transits).HasForeignKey(e => e.LinkId);
                 builder.HasOne(e => e.Train).WithMany(e => e.Transits).HasForeignKey(e => e.TrainId);
+                builder.HasData(new Transit
+                {
+                    TransitId = 1,
+                    LinkId = 1,
+                    TrainId = 1,
+                    Date = new DateTime(2023, 1, 1).ToUniversalTime(),
+                    delay = 0,
+                    state = TransitState.Waiting
+                });
             });
 
             modelBuilder.Entity<Train>(builder =>
             {
                 builder.HasKey(e => e.TrainId);
+                builder.HasData(new Train
+                {
+                    TrainId = 1,
+                    Name = "Orzeszkowa",
+                    Type = "IC"
+                });
             });
 
             modelBuilder.Entity<Ticket>(builder =>
@@ -104,71 +167,81 @@ namespace API.Models.Enum
                 builder.HasKey(e => e.TicketId);
                 builder.HasOne(e => e.Transit).WithMany(e => e.Tickets).HasForeignKey(e => e.TransitId);
                 builder.HasOne(e => e.Passenger).WithMany(e => e.Tickets).HasForeignKey(e => e.PassengerId);
-            });
-
-            modelBuilder.Entity<Passenger>(builder =>
-            {
-                builder.HasKey(e => e.PassengerId);
-                builder.HasOne(e => e.Person).WithOne(e => e.Passenger);
+                builder.HasData(new Ticket
+                {
+                    TicketId = 1,
+                    TransitId = 1,
+                    PassengerId = 1,
+                    DepartureTime = new DateTime(2023, 1, 1, 12, 0, 0).ToUniversalTime(),
+                    Price = 10,
+                    Wagon = 1,
+                    Seat = 1,
+                    SeatType = SeatType.Window
+                });
             });
 
             modelBuilder.Entity<Person>(builder =>
             {
+                builder.UseTptMappingStrategy();
                 builder.HasKey(e => e.PersonId);
-                builder.HasOne(e => e.Employee).WithOne(e => e.Person);
-                builder.HasOne(e => e.Passenger).WithOne(e => e.Person);
+                builder.HasOne(e => e.Passenger).WithOne(e => e.Person).HasForeignKey<Passenger>(e => e.PersonId);
+                builder.HasOne(e => e.Employee).WithOne(e => e.Person).HasForeignKey<Employee>(e => e.PersonId);
             });
 
             modelBuilder.Entity<Employee>(builder =>
             {
-                builder.HasKey(e => e.EmployeeId);
-                builder.HasOne(e => e.Person).WithOne(e => e.Employee);
-                builder.HasOne(e => e.Driver).WithOne(e => e.Employee);
-                builder.HasOne(e => e.Conductor).WithOne(e => e.Employee);
+                builder.UseTptMappingStrategy();
                 builder.HasOne(e => e.Train).WithMany(e => e.Employees).HasForeignKey(e => e.TrainId);
             });
 
-            modelBuilder.Entity<Driver>(builder =>
+            modelBuilder.Entity<Passenger>(builder =>
             {
-                builder.HasKey(e => e.DriverId);
-                builder.HasOne(e => e.Employee).WithOne(e => e.Driver);
-            });
-
-            modelBuilder.Entity<Conductor>(builder =>
-            {
-                builder.HasKey(e => e.ConductorId);
-                builder.HasOne(e => e.Employee).WithOne(e => e.Conductor);
-            });
-
-            modelBuilder.Entity<Train>(builder =>
-            {
-                builder.HasKey(e => e.TrainId);
+                builder.HasIndex(e => e.Email).IsUnique();
+                builder.HasData(new Passenger
+                {
+                    PersonId = 1,
+                    FirstName = "Jan",
+                    LastName = "Kowalski",
+                    Email = "jan.kwalski@mail.com",
+                    PhoneNumber = "123456789",
+                    Pasword = "1234"
+                });
             });
 
             modelBuilder.Entity<Wagon>(builder =>
             {
+                builder.UseTptMappingStrategy();
                 builder.HasKey(e => e.WagonId);
                 builder.HasOne(e => e.Train).WithMany(e => e.Wagons).HasForeignKey(e => e.TrainId);
-                builder.HasOne(e => e.OpenWagon).WithOne(e => e.Wagon);
-                builder.HasOne(e => e.CompartmentWagon).WithOne(e => e.Wagon);
-            });
-
-            modelBuilder.Entity<OpenWagon>(builder =>
-            {
-                builder.HasKey(e => e.OpenWagonId);
-                builder.HasOne(e => e.Wagon).WithOne(e => e.OpenWagon);
+                builder.HasOne(e => e.OpenWagon).WithOne(e => e.Wagon).HasForeignKey<OpenWagon>(e => e.WagonId);
+                builder.HasOne(e => e.CompartmentWagon).WithOne(e => e.Wagon).HasForeignKey<CompartmentWagon>(e => e.WagonId);
             });
 
             modelBuilder.Entity<CompartmentWagon>(builder =>
             {
-                builder.HasKey(e => e.WagonId);
-                builder.HasOne(e => e.Wagon).WithOne(e => e.CompartmentWagon);
+                builder.HasData(new CompartmentWagon
+                {
+                    WagonId = 1,
+                    WagonNumber = 1,
+                    TrainId = 1,
+                    NumberOfCompartments = 10,
+                    Class = 1,
+                    NumberOfSeats = 40,
+                    IsSeatRequired = true
+                });
             });
 
             modelBuilder.Entity<Seat>(builder =>
             {
                 builder.HasKey(e => e.SeatId);
                 builder.HasOne(e => e.Wagon).WithMany(e => e.Seats).HasForeignKey(e => e.WagonId);
+                builder.HasData(new Seat
+                {
+                    SeatId = 1,
+                    WagonId = 1,
+                    SeatNumber = 1,
+                    Type = SeatType.Window
+                });
             });
         }
     }

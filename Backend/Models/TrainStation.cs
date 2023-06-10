@@ -12,11 +12,11 @@ namespace API.Models
         public int StationId { get; set; }
         public int CityId { get; set; }
         [Required]
-        public int NumbrOfPlatforms { get; set; }
+        public int NumberOfPlatforms { get; set; }
         [Required]
-        public int NumbrOfTracks { get; set; }
+        public int NumberOfTracks { get; set; }
+        [Required]
         public string Name { get; set; }
-        public StationType? StationType { get; set; }
         public virtual City City { get; set; }
         public virtual IEnumerable<LinkStations> LinkStations { get; set; }
     }
