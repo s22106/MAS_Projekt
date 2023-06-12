@@ -5,7 +5,6 @@ namespace API.Models
 {
     public class Passenger : Person
     {
-        public int PassengerId { get; set; }
         [Required]
         [StringLength(50)]
         [EmailAddress]

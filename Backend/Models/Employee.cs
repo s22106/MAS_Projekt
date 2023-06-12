@@ -4,7 +4,6 @@ namespace API.Models
 {
     public abstract class Employee : Person
     {
-        public int EmployeeId { get; set; }
         [Required]
         public int TrainId { get; set; }
         [Required]

@@ -11,6 +11,8 @@ namespace API.Models
         [Required]
         public int SeatNumber { get; set; }
         [Required]
+        public int WagonNumber { get; set; }
+        [Required]
         [EnumDataType(typeof(SeatType))]
         public SeatType Type { get; set; }
         public virtual Wagon Wagon { get; set; }

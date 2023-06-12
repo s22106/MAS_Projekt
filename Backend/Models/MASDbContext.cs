@@ -56,7 +56,7 @@ namespace API.Models
             modelBuilder.Entity<TrainStation>(builder =>
             {
                 builder.HasKey(e => e.StationId);
-                builder.HasOne(e => e.City).WithMany(e => e.TrainStations).HasForeignKey(e => e.CityId);
+                builder.HasOne(e => e.City).WithMany(e => e.TrainStations).HasForeignKey(e => e.CityId).IsRequired();
                 //wiecej stacji
                 builder.HasData(new TrainStation
                 {
@@ -92,8 +92,8 @@ namespace API.Models
                     e.StationId,
                     e.LinkId
                 });
-                builder.HasOne(e => e.Station).WithMany(e => e.LinkStations).HasForeignKey(e => e.StationId);
-                builder.HasOne(e => e.Link).WithMany(e => e.LinkStations).HasForeignKey(e => e.LinkId);
+                builder.HasOne(e => e.Station).WithMany(e => e.LinkStations).HasForeignKey(e => e.StationId).IsRequired();
+                builder.HasOne(e => e.Link).WithMany(e => e.LinkStations).HasForeignKey(e => e.LinkId).IsRequired();
                 builder.HasData(
                     new LinkStations
                     {
@@ -138,8 +138,8 @@ namespace API.Models
             modelBuilder.Entity<Transit>(builder =>
             {
                 builder.HasKey(e => e.TransitId);
-                builder.HasOne(e => e.Link).WithMany(e => e.Transits).HasForeignKey(e => e.LinkId);
-                builder.HasOne(e => e.Train).WithMany(e => e.Transits).HasForeignKey(e => e.TrainId);
+                builder.HasOne(e => e.Link).WithMany(e => e.Transits).HasForeignKey(e => e.LinkId).IsRequired();
+                builder.HasOne(e => e.Train).WithMany(e => e.Transits).HasForeignKey(e => e.TrainId).IsRequired();
                 builder.HasData(new Transit
                 {
                     TransitId = 1,
@@ -165,8 +165,8 @@ namespace API.Models
             modelBuilder.Entity<Ticket>(builder =>
             {
                 builder.HasKey(e => e.TicketId);
-                builder.HasOne(e => e.Transit).WithMany(e => e.Tickets).HasForeignKey(e => e.TransitId);
-                builder.HasOne(e => e.Passenger).WithMany(e => e.Tickets).HasForeignKey(e => e.PassengerId);
+                builder.HasOne(e => e.Transit).WithMany(e => e.Tickets).HasForeignKey(e => e.TransitId).IsRequired();
+                builder.HasOne(e => e.Passenger).WithMany(e => e.Tickets).HasForeignKey(e => e.PassengerId).IsRequired();
                 builder.HasData(new Ticket
                 {
                     TicketId = 1,
@@ -212,9 +212,9 @@ namespace API.Models
             {
                 builder.UseTptMappingStrategy();
                 builder.HasKey(e => e.WagonId);
-                builder.HasOne(e => e.Train).WithMany(e => e.Wagons).HasForeignKey(e => e.TrainId);
-                builder.HasOne(e => e.OpenWagon).WithOne(e => e.Wagon).HasForeignKey<OpenWagon>(e => e.WagonId);
+                builder.HasOne(e => e.Train).WithMany(e => e.Wagons).HasForeignKey(e => e.TrainId).IsRequired();
                 builder.HasOne(e => e.CompartmentWagon).WithOne(e => e.Wagon).HasForeignKey<CompartmentWagon>(e => e.WagonId);
+                builder.HasOne(e => e.OpenWagon).WithOne(e => e.Wagon).HasForeignKey<OpenWagon>(e => e.WagonId);
             });
 
             modelBuilder.Entity<CompartmentWagon>(builder =>
@@ -231,15 +231,29 @@ namespace API.Models
                 });
             });
 
+            modelBuilder.Entity<OpenWagon>(builder =>
+            {
+                builder.HasData(new OpenWagon
+                {
+                    WagonId = 2,
+                    WagonNumber = 2,
+                    TrainId = 1,
+                    Type = OpenWagonType.Normal,
+                    Class = 2,
+                    NumberOfSeats = 80,
+                });
+            });
+
             modelBuilder.Entity<Seat>(builder =>
             {
                 builder.HasKey(e => e.SeatId);
-                builder.HasOne(e => e.Wagon).WithMany(e => e.Seats).HasForeignKey(e => e.WagonId);
+                builder.HasOne(e => e.Wagon).WithMany(e => e.Seats).HasForeignKey(e => e.WagonId).IsRequired();
                 builder.HasData(new Seat
                 {
                     SeatId = 1,
                     WagonId = 1,
                     SeatNumber = 1,
+                    WagonNumber = 1,
                     Type = SeatType.Window
                 });
             });

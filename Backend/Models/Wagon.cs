@@ -18,8 +18,8 @@ namespace API.Models
         public bool? IsSeatRequired { get; set; }
         [Required]
         public int WagonNumber { get; set; }
-        public virtual OpenWagon OpenWagon { get; set; }
-        public virtual CompartmentWagon CompartmentWagon { get; set; }
+        public virtual OpenWagon? OpenWagon { get; set; }
+        public virtual CompartmentWagon? CompartmentWagon { get; set; }
         public virtual Train Train { get; set; }
         public virtual IEnumerable<Seat> Seats { get; set; }
     }

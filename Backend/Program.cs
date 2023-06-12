@@ -1,4 +1,6 @@
 using API.Models;
+using Backend.Services.Interfaces;
+using Backend.Services.Providers;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +15,7 @@ builder.Services.AddDbContext<MASDbContext>(e =>
 
 // Add services to the container.
 //services.AddScoped<>
+//builder.Services.AddScoped<ITrainStationService, TrainStationService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
