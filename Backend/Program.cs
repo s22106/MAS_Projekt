@@ -15,7 +15,9 @@ builder.Services.AddDbContext<MASDbContext>(e =>
 
 // Add services to the container.
 //services.AddScoped<>
-//builder.Services.AddScoped<ITrainStationService, TrainStationService>();
+
+builder.Services.AddScoped<ITrainStationService, TrainStationService>();
+builder.Services.AddScoped<ITransitService, TransitService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

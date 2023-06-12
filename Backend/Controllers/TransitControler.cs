@@ -26,7 +26,7 @@ namespace Backend.Controllers
             var railLinkIDs = await _trainStationService.SearchRailLinks(startStation, endStation);
             var transitsByDay = await _transitService.GetTransitsByDay(date, railLinkIDs);
 
-            return NoContent();
+            return Ok(transitsByDay);
         }
     }
 }
