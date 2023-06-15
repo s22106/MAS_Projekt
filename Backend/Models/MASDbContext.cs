@@ -248,14 +248,25 @@ namespace API.Models
             {
                 builder.HasKey(e => e.SeatId);
                 builder.HasOne(e => e.Wagon).WithMany(e => e.Seats).HasForeignKey(e => e.WagonId).IsRequired();
-                builder.HasData(new Seat
+                Seat[] seats = new Seat[40];
+                seats = Enumerable.Range(1, 40).Select(i => new Seat
                 {
-                    SeatId = 1,
+                    SeatId = i,
                     WagonId = 1,
-                    SeatNumber = 1,
+                    SeatNumber = i,
                     WagonNumber = 1,
                     Type = SeatType.Window
-                });
+                }).ToArray();
+                builder.HasData(seats);
+                Seat[] seatsOpen = Enumerable.Range(1, 80).Select(i => new Seat
+                {
+                    SeatId = i + 40,
+                    WagonId = 2,
+                    SeatNumber = i,
+                    WagonNumber = 2,
+                    Type = SeatType.Window
+                }).ToArray();
+                builder.HasData(seatsOpen);
             });
         }
     }

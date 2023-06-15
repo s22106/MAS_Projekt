@@ -2,6 +2,7 @@ using API.Models;
 using Backend.Services.Interfaces;
 using Backend.Services.Providers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Cors;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,17 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 builder.Services.AddDbContext<MASDbContext>(e =>
 {
     e.UseNpgsql("User ID=postgres;Password=postgres;Host=localhost;Port=5432;Database=postgres");
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+    builder =>
+    {
+        builder.WithOrigins("http://localhost:3000")
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
 });
 
 // Add services to the container.
@@ -31,7 +43,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors("AllowReactApp");
 }
+
 
 app.UseHttpsRedirection();
 

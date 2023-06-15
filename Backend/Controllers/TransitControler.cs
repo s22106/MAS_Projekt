@@ -21,12 +21,19 @@ namespace Backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetTransits(string startStation, string endStation, DateTime date)
+        public async Task<IActionResult> GetTransits([FromQuery] string startStation, [FromQuery] string endStation, [FromQuery] DateTime date)
         {
             var railLinkIDs = await _trainStationService.SearchRailLinks(startStation, endStation);
             var transitsByDay = await _transitService.GetTransitsByDay(date, railLinkIDs);
 
             return Ok(transitsByDay);
+        }
+        [HttpGet("{transitId}")]
+        public async Task<IActionResult> GetTransitById(int transitId)
+        {
+            var transit = await _transitService.GetTransitById(transitId);
+
+            return Ok(transit);
         }
     }
 }
