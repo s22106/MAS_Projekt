@@ -226,7 +226,6 @@ namespace API.Models
                     TrainId = 1,
                     NumberOfCompartments = 10,
                     Class = 1,
-                    NumberOfSeats = 40,
                     IsSeatRequired = true
                 });
             });
@@ -240,7 +239,6 @@ namespace API.Models
                     TrainId = 1,
                     Type = OpenWagonType.Normal,
                     Class = 2,
-                    NumberOfSeats = 80,
                 });
             });
 

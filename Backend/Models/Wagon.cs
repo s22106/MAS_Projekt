@@ -13,8 +13,16 @@ namespace API.Models
         public int TrainId { get; set; }
         [Required]
         public int Class { get; set; }
-        [Required]
-        public int NumberOfSeats { get; set; }
+        public int NumberOfSeats
+        {
+            get
+            {
+                if (Class == 1)
+                    return 40;
+                else
+                    return 80;
+            }
+        }
         public bool? IsSeatRequired { get; set; }
         [Required]
         public int WagonNumber { get; set; }

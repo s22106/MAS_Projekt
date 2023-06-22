@@ -5,6 +5,6 @@ namespace API.Models
     public class Conductor : Employee
     {
         [Required]
-        public string bonus { get; set; }
+        public string role { get; set; }
     }
 }

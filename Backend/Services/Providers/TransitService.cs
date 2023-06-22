@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using API.Models;
 using Backend.Models.DTOs;
+using Backend.Models.Enum;
 using Backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,34 +20,77 @@ namespace Backend.Services.Providers
             _context = context;
         }
 
-        public async Task<Dictionary<int, KeyValuePair<int, int>>> GetFreeSeats(int transitId)
+        public async Task<TicketGet> BuyTicket(TicketInfoGet ticketInfo, int passengerId)
+        {
+            using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            var person = await _context.Persons
+                .Where(e => e.PersonId == passengerId)
+                .FirstOrDefaultAsync();
+            SeatType seatType = await _context.Seats
+                .Where(e => e.WagonNumber == ticketInfo.wagonNumber && e.SeatNumber == ticketInfo.seatNumber)
+                .Select(e => e.Type)
+                .FirstOrDefaultAsync();
+            string format = "HH:mm:ss";
+            DateTime.TryParseExact(ticketInfo.date, format, null, System.Globalization.DateTimeStyles.None, out DateTime dateTime);
+            dateTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, dateTime.Hour, dateTime.Minute, dateTime.Second);
+            var entity = await _context.Set<Ticket>()
+                .AddAsync(new Ticket
+                {
+                    TransitId = 1,
+                    Seat = ticketInfo.seatNumber,
+                    Wagon = ticketInfo.wagonNumber,
+                    PassengerId = passengerId,
+                    Price = 19.99m,
+                    DepartureTime = dateTime,
+                    SeatType = seatType,
+                });
+            await _context.SaveChangesAsync();
+            transaction.Complete();
+
+            return new TicketGet
+            {
+                FirstName = person.FirstName,
+                LastName = person.LastName,
+                Price = entity.Entity.Price,
+                SeatNumber = entity.Entity.Seat,
+                WagonNumber = entity.Entity.Wagon,
+                DepartureTime = entity.Entity.DepartureTime,
+                StartStation = ticketInfo.startStation,
+                EndStation = ticketInfo.endStation,
+                SeatType = entity.Entity.SeatType,
+            };
+        }
+
+        public async Task<List<SeatGet>> GetFreeSeats(int transitId)
         {
             //Bad if different trains on different dates 
-            //TODO: Better check for trains
             var trainId = await _context.Transits
                 .Where(e => e.TransitId == transitId)
                 .Select(e => e.TransitId)
                 .FirstOrDefaultAsync();
             var AllSeats = await _context.Seats
+                .Include(e => e.Wagon)
                 .Where(e => e.Wagon.TrainId == trainId)
                 .Distinct()
-                .ToDictionaryAsync(x => x.SeatId, y => new KeyValuePair<int, int>(y.WagonNumber, y.SeatNumber));
+                .Select(e => new SeatGet
+                {
+                    WagonNumber = e.Wagon.WagonNumber,
+                    SeatNumber = e.SeatNumber
+                })
+                .ToListAsync();
             var SeatsTaken = await _context.Tickets
                 .Where(e => e.TransitId == transitId)
-                .ToDictionaryAsync(x => x.TicketId, y => new KeyValuePair<int, int>(y.Wagon, y.Seat));
-
-            var SeatsToRemove = SeatsTaken.Values.ToList();
-
-            foreach (var seat in SeatsToRemove)
-            {
-                var seatToRemove = AllSeats.FirstOrDefault(kvp => kvp.Value.Equals(seat));
-                if (!Equals(seatToRemove, default(KeyValuePair<int, KeyValuePair<int, int>>)))
+                .Distinct()
+                .Select(e => new SeatGet
                 {
-                    AllSeats.Remove(seatToRemove.Key);
-                }
-            }
+                    WagonNumber = e.Wagon,
+                    SeatNumber = e.Seat
+                })
+                .ToListAsync();
 
-            return AllSeats;
+            var SeatsLeft = AllSeats.Where(e => !SeatsTaken.Any(x => x.WagonNumber == e.WagonNumber && x.SeatNumber == e.SeatNumber)).ToList();
+
+            return SeatsLeft;
         }
 
         public async Task<TransitsGet> GetTransitById(int id)
